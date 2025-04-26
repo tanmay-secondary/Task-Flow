@@ -20,9 +20,9 @@ interface TaskCardProps {
 }
 
 const priorityColors = {
-  low: 'bg-blue-500',
-  medium: 'bg-yellow-500',
-  high: 'bg-red-500'
+  low: 'bg-blue-500/80',
+  medium: 'bg-yellow-500/80',
+  high: 'bg-red-500/80'
 };
 
 const TaskCard = ({ task, boardId, listId }: TaskCardProps) => {
@@ -64,12 +64,12 @@ const TaskCard = ({ task, boardId, listId }: TaskCardProps) => {
   return (
     <>
       <div 
-        className="task-card group animate-task-appear cursor-pointer" 
+        className="task-card group animate-task-appear cursor-pointer"
         onClick={() => setIsDialogOpen(true)}
         draggable
       >
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-medium text-sm truncate">{task.title}</h3>
+          <h3 className="font-medium text-sm truncate text-gray-800 dark:text-gray-200">{task.title}</h3>
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${priorityColors[task.priority]}`}></div>
             <Button
@@ -78,15 +78,15 @@ const TaskCard = ({ task, boardId, listId }: TaskCardProps) => {
               className="opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={handleDelete}
             >
-              <Trash2 className="h-4 w-4 text-destructive" />
+              <Trash2 className="h-4 w-4 text-destructive hover:text-destructive/80" />
             </Button>
           </div>
         </div>
         {task.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>
+          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{task.description}</p>
         )}
         {task.dueDate && (
-          <div className="mt-2 text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground flex items-center gap-1">
             Due: {format(new Date(task.dueDate), 'MMM d, yyyy')}
           </div>
         )}

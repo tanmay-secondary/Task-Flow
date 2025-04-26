@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 230 100% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -61,20 +61,22 @@
 
 @layer utilities {
   .task-card {
-    @apply bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 
+    @apply bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg border border-gray-200 dark:border-gray-700 
            shadow-sm hover:shadow-md transition-all duration-200 
-           backdrop-blur-sm;
+           backdrop-blur-sm hover:scale-102;
   }
   
   .list-container {
-    @apply bg-gray-50 dark:bg-gray-900 rounded-lg p-4 w-80 flex-shrink-0 
-           max-h-[calc(100vh-12rem)] flex flex-col shadow-lg border-2 
-           border-gray-200 dark:border-gray-700 transition-colors;
+    @apply bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-900/80 
+           rounded-lg p-4 w-80 flex-shrink-0 max-h-[calc(100vh-12rem)] flex flex-col 
+           shadow-lg border border-gray-200/50 dark:border-gray-700/50 
+           backdrop-blur-md transition-all duration-300;
   }
   
   .board-container {
     @apply flex overflow-x-auto gap-6 p-6 pb-8 items-start h-[calc(100vh-12rem)]
-           bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800;
+           bg-gradient-to-br from-blue-50/30 to-purple-50/30 dark:from-gray-900/30 dark:to-gray-800/30
+           backdrop-blur-sm;
   }
   
   .animate-task-appear {
