@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useTaskContext, List, Task } from '@/contexts/TaskContext';
 import TaskCard from './TaskCard';
@@ -14,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface TaskListProps {
   list: List;
@@ -21,9 +23,9 @@ interface TaskListProps {
 }
 
 const listColors = {
-  'To Do': 'bg-pink-50 border-pink-200 text-pink-900',
-  'In Progress': 'bg-yellow-50 border-yellow-200 text-yellow-900',
-  'Done': 'bg-green-50 border-green-200 text-green-900'
+  'To Do': 'bg-pink-50 border-pink-200 dark:bg-pink-900/20 dark:border-pink-800',
+  'In Progress': 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800',
+  'Done': 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
 };
 
 const TaskList = ({ list, boardId }: TaskListProps) => {
@@ -59,6 +61,8 @@ const TaskList = ({ list, boardId }: TaskListProps) => {
         status: 'todo',
       });
       setIsDialogOpen(false);
+    } else {
+      toast.error("Task title cannot be empty");
     }
   };
 
@@ -83,13 +87,14 @@ const TaskList = ({ list, boardId }: TaskListProps) => {
     }
   };
 
+  const listClassName = `list-container ${listColors[list.title] || 'bg-gray-50 dark:bg-gray-900/40 border-gray-200 dark:border-gray-700'}`;
+
   return (
     <div 
-      className={`list-container ${listColors[list.title] || 'bg-gray-50 border-gray-200 text-gray-900'}`}
+      className={listClassName}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      <h3 className="font-semibold mb-3 text-center">{list.title}</h3>
       <div className="flex-grow overflow-y-auto space-y-2 px-2">
         {list.tasks.map(task => (
           <div 

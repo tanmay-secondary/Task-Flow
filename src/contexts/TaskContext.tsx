@@ -32,6 +32,8 @@ interface TaskContextType {
   setActiveBoard: (boardId: string) => void;
   createBoard: (title: string) => void;
   createList: (boardId: string, title: string) => void;
+  updateListTitle: (boardId: string, listId: string, newTitle: string) => void;
+  deleteList: (boardId: string, listId: string) => void;
   createTask: (boardId: string, listId: string, task: Omit<Task, 'id' | 'createdAt'>) => void;
   updateTask: (boardId: string, listId: string, taskId: string, updates: Partial<Task>) => void;
   moveTask: (sourceBoardId: string, sourceListId: string, sourceTaskId: string, 
@@ -177,6 +179,68 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     }
     
     toast.success('List created');
+  };
+
+  const updateListTitle = (boardId: string, listId: string, newTitle: string) => {
+    setBoards(prevBoards => 
+      prevBoards.map(board => {
+        if (board.id === boardId) {
+          return {
+            ...board,
+            lists: board.lists.map(list => {
+              if (list.id === listId) {
+                return {
+                  ...list,
+                  title: newTitle
+                };
+              }
+              return list;
+            })
+          };
+        }
+        return board;
+      })
+    );
+    
+    if (activeBoard?.id === boardId) {
+      setActiveBoardState(prev => 
+        prev ? {
+          ...prev,
+          lists: prev.lists.map(list => {
+            if (list.id === listId) {
+              return {
+                ...list,
+                title: newTitle
+              };
+            }
+            return list;
+          })
+        } : null
+      );
+    }
+  };
+
+  const deleteList = (boardId: string, listId: string) => {
+    setBoards(prevBoards => 
+      prevBoards.map(board => {
+        if (board.id === boardId) {
+          return {
+            ...board,
+            lists: board.lists.filter(list => list.id !== listId)
+          };
+        }
+        return board;
+      })
+    );
+    
+    if (activeBoard?.id === boardId) {
+      setActiveBoardState(prev => 
+        prev ? {
+          ...prev,
+          lists: prev.lists.filter(list => list.id !== listId)
+        } : null
+      );
+    }
   };
 
   const createTask = (boardId: string, listId: string, taskData: Omit<Task, 'id' | 'createdAt'>) => {
@@ -412,6 +476,8 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     setActiveBoard,
     createBoard,
     createList,
+    updateListTitle,
+    deleteList,
     createTask,
     updateTask,
     moveTask,

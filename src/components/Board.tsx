@@ -13,12 +13,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Board = () => {
-  const { activeBoard, createList } = useTaskContext();
+  const { activeBoard, createList, deleteList, updateListTitle } = useTaskContext();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newListTitle, setNewListTitle] = useState('');
+  const [editingList, setEditingList] = useState({ id: '', title: '' });
   const [isGithubDialogOpen, setIsGithubDialogOpen] = useState(false);
   const [githubRepo, setGithubRepo] = useState('');
 
@@ -27,17 +30,51 @@ const Board = () => {
       createList(activeBoard.id, newListTitle.trim());
       setNewListTitle('');
       setIsDialogOpen(false);
+      toast.success(`List "${newListTitle.trim()}" created successfully`);
+    } else {
+      toast.error("List title cannot be empty");
     }
+  };
+
+  const handleEditList = () => {
+    if (editingList.title.trim() && activeBoard) {
+      updateListTitle(activeBoard.id, editingList.id, editingList.title);
+      setIsEditDialogOpen(false);
+      toast.success(`List renamed to "${editingList.title}"`);
+    } else {
+      toast.error("List title cannot be empty");
+    }
+  };
+
+  const handleDeleteList = (listId: string, listTitle: string) => {
+    if (activeBoard) {
+      deleteList(activeBoard.id, listId);
+      toast.success(`List "${listTitle}" deleted`);
+    }
+  };
+
+  const openEditDialog = (list: { id: string, title: string }) => {
+    setEditingList({ id: list.id, title: list.title });
+    setIsEditDialogOpen(true);
   };
 
   const handleConnectGithub = () => {
     if (githubRepo.trim() && activeBoard) {
+      // Validate GitHub repo URL format
+      const githubUrlPattern = /^(https?:\/\/)?(www\.)?github\.com\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-_\.]+\/?$/;
+      
+      if (!githubUrlPattern.test(githubRepo.trim())) {
+        toast.error("Please enter a valid GitHub repository URL");
+        return;
+      }
+      
       // In a real implementation, this would validate and setup GitHub webhooks
-      // For now, we'll just store the repo URL
       const { connectGithubRepo } = useTaskContext();
       connectGithubRepo(activeBoard.id, githubRepo.trim());
       setGithubRepo('');
       setIsGithubDialogOpen(false);
+    } else {
+      toast.error("GitHub repository URL cannot be empty");
     }
   };
 
@@ -71,7 +108,30 @@ const Board = () => {
         
         <div className="board-container justify-center">
           {activeBoard.lists.map(list => (
-            <TaskList key={list.id} list={list} boardId={activeBoard.id} />
+            <div key={list.id} className="flex flex-col">
+              <div className="flex items-center justify-between mb-2 px-4">
+                <h3 className="font-semibold">{list.title}</h3>
+                <div className="flex gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6" 
+                    onClick={() => openEditDialog(list)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 text-destructive" 
+                    onClick={() => handleDeleteList(list.id, list.title)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <TaskList key={list.id} list={list} boardId={activeBoard.id} />
+            </div>
           ))}
           
           <Button 
@@ -108,6 +168,33 @@ const Board = () => {
               Cancel
             </Button>
             <Button onClick={handleCreateList}>Create List</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit List</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="edit-list-title">List Title</Label>
+            <Input 
+              id="edit-list-title"
+              value={editingList.title}
+              onChange={(e) => setEditingList({...editingList, title: e.target.value})}
+              placeholder="Enter list title"
+              className="mt-2"
+            />
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleEditList}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -23,13 +23,13 @@ const Home = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background to-muted">
       <Navigation />
+      <div className="p-4">
+        <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm p-4 text-center mb-4">
+          <p className="text-sm text-muted-foreground italic">{quote}</p>
+        </Card>
+      </div>
       <main className="flex-1 overflow-hidden flex flex-col">
         <Board />
-        <div className="p-4 mt-auto">
-          <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm p-4 text-center">
-            <p className="text-sm text-muted-foreground italic">{quote}</p>
-          </Card>
-        </div>
       </main>
     </div>
   );
