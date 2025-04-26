@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
@@ -37,6 +36,7 @@ interface TaskContextType {
   updateTask: (boardId: string, listId: string, taskId: string, updates: Partial<Task>) => void;
   moveTask: (sourceBoardId: string, sourceListId: string, sourceTaskId: string, 
              destBoardId: string, destListId: string) => void;
+  deleteTask: (boardId: string, listId: string, taskId: string) => void;
   connectGithubRepo: (boardId: string, repoUrl: string) => void;
 }
 
@@ -342,6 +342,45 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     toast.success('Task moved');
   };
 
+  const deleteTask = (boardId: string, listId: string, taskId: string) => {
+    setBoards(prevBoards => 
+      prevBoards.map(board => {
+        if (board.id === boardId) {
+          return {
+            ...board,
+            lists: board.lists.map(list => {
+              if (list.id === listId) {
+                return {
+                  ...list,
+                  tasks: list.tasks.filter(task => task.id !== taskId)
+                };
+              }
+              return list;
+            })
+          };
+        }
+        return board;
+      })
+    );
+    
+    if (activeBoard?.id === boardId) {
+      setActiveBoardState(prev => 
+        prev ? {
+          ...prev,
+          lists: prev.lists.map(list => {
+            if (list.id === listId) {
+              return {
+                ...list,
+                tasks: list.tasks.filter(task => task.id !== taskId)
+              };
+            }
+            return list;
+          })
+        } : null
+      );
+    }
+  };
+
   const connectGithubRepo = (boardId: string, repoUrl: string) => {
     setBoards(prevBoards => 
       prevBoards.map(board => {
@@ -376,6 +415,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     createTask,
     updateTask,
     moveTask,
+    deleteTask,
     connectGithubRepo
   };
 

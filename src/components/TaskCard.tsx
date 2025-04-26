@@ -2,11 +2,7 @@
 import React from 'react';
 import { useTaskContext, Task } from '@/contexts/TaskContext';
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter 
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface TaskCardProps {
   task: Task;
@@ -28,13 +26,24 @@ const priorityColors = {
 };
 
 const TaskCard = ({ task, boardId, listId }: TaskCardProps) => {
-  const { updateTask } = useTaskContext();
+  const { updateTask, deleteTask } = useTaskContext();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [editedTask, setEditedTask] = React.useState<Task>({ ...task });
 
   const handleSave = () => {
+    if (!editedTask.title.trim()) {
+      toast.error('Task title is required');
+      return;
+    }
     updateTask(boardId, listId, task.id, editedTask);
     setIsDialogOpen(false);
+    toast.success('Task updated successfully');
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteTask(boardId, listId, task.id);
+    toast.success('Task deleted successfully');
   };
 
   const handleChange = (
@@ -44,6 +53,10 @@ const TaskCard = ({ task, boardId, listId }: TaskCardProps) => {
     setEditedTask(prev => ({ ...prev, [name]: value }));
   };
 
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleSelectChange = (name: string, value: string) => {
     setEditedTask(prev => ({ ...prev, [name]: value }));
   };
@@ -51,13 +64,23 @@ const TaskCard = ({ task, boardId, listId }: TaskCardProps) => {
   return (
     <>
       <div 
-        className="task-card animate-task-appear cursor-pointer" 
+        className="task-card group animate-task-appear cursor-pointer" 
         onClick={() => setIsDialogOpen(true)}
         draggable
       >
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-medium text-sm truncate">{task.title}</h3>
-          <div className={`w-2 h-2 rounded-full ${priorityColors[task.priority]}`}></div>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${priorityColors[task.priority]}`}></div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </div>
         </div>
         {task.description && (
           <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>
@@ -82,6 +105,7 @@ const TaskCard = ({ task, boardId, listId }: TaskCardProps) => {
                 name="title"
                 value={editedTask.title}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="space-y-2">
@@ -117,22 +141,6 @@ const TaskCard = ({ task, boardId, listId }: TaskCardProps) => {
                   <SelectItem value="low">Low</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={editedTask.status}
-                onValueChange={(value) => handleSelectChange('status', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todo">To Do</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
